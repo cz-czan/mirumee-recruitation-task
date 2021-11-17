@@ -1,17 +1,50 @@
 import fetch as f
 
 
-def get_full_core_information(fetch_count :int, unsuccessful :bool, planned :bool):
+def get_full_core_information(count :int):
     """
-        Crosses/links information fetched by fetch.fetch_cores_information() and fetch.fetch_missions_information() so that we achieve the
-        following information about all cores:
+        Crosses/links information fetched by fetch.fetch_cores_information() and fetch.fetch_missions_information() so
+        that we get:
             - the core's id
             - it's reuse count
             - the total mass of the payloads it carried to space in all missions it took part in ( in the first stage ).
+        in the following format:
+            (<core id>, <core reuse count>, <core's total payload mass delivered to space throughout all missions>)
     """
-    # As of right now i've got 0 idea how to use the "order:" option in the GraphQL query for this API, so i'm leaving
-    # the implementation of the fetch_count parameter for later. Will implement unsuccessful/planned launches inclusion
-    # once core functionality is working.
 
-    missions_information = f.fetch_missions_information()
-    cores_information = f.fetch_cores_information()
+    complete_core_information = []
+    missions_information = f.fetch_missions_information()["data"]["launchesPast"]
+    cores_information = f.fetch_cores_information(count)["data"]["cores"]
+
+    for core in cores_information:
+        # List of lists containing the mission names and
+        total_payload_mass = 0
+
+        for mission in missions_information:
+            # IDs of all cores in the first stage of the rocket used in this mission.
+            mission_fs_core_ids = [core["core"]["id"] for core in mission["rocket"]["first_stage"]["cores"]]
+
+            # List comprehension and a "short if" is used below to avoid using unnecessary loops and long if statements.
+            mission_total_payload_mass = sum(
+                [payload["payload_mass_kg"] if type(payload["payload_mass_kg"]) == int else 0 for payload in
+                 mission["rocket"]["second_stage"]["payloads"]])
+
+            for fs_core_id in mission_fs_core_ids:
+                if core['id'] in mission_fs_core_ids:
+                    print(f"{core['id']} took part in mission {mission['mission_name']}"
+                          f" and delivered a payload of {mission_total_payload_mass} kg")
+                    total_payload_mass += mission_total_payload_mass
+                    break
+
+        print(f"{core['id']}'s total payload mass delivered throughout all missions is: {total_payload_mass} kgs.\n"
+              f"It had been reused {core['reuse_count']} times.\n")
+
+        complete_core_information.append((core['id'], core['reuse_count'], total_payload_mass))
+
+    return complete_core_information
+
+    # for mission in missions_information:
+    #     print(mission["mission_name"])
+
+
+print(get_full_core_information(2))

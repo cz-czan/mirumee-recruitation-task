@@ -1,8 +1,6 @@
 import requests
-import json
 
 url = "http://api.spacex.land/graphql"
-
 headers = {
     'Content-Type': 'application/json'
 }
@@ -19,12 +17,13 @@ def fetch_missions_information():
     return requests.request("POST", url, headers=headers, data=payload).json()
 
 
-def fetch_cores_information():
+def fetch_cores_information(count: int):
     """
         Fetches the following information about all the cores from the API:
             - the core's id
             - the names of missions where the core was used
             - the reuse count
     """
-    payload = '{"query":"{\\r\\n  cores {\\r\\n    id\\r\\n    missions {\\r\\n      name\\r\\n    }\\r\\n    reuse_count\\r\\n  }\\r\\n}\\r\\n","variables":{}}'
+    payload = '{\"query\":\"{\\r\\n  cores(sort: \\\"reuse_count\\\", order: \\\"desc\\\", limit: ' + \
+              str(count) + ') {\\r\\n    id\\r\\n    missions {\\r\\n      name\\r\\n    }\\r\\n    reuse_count\\r\\n  }\\r\\n}\",\"variables\":{}}'
     return requests.request("POST", url, headers=headers, data=payload).json()
