@@ -5,17 +5,43 @@ headers = {
     'Content-Type': 'application/json'
 }
 
+# The queries are stored in .txt files to avoid clutter in the source
+with open('queries/past_missions.txt', 'r') as fs:
+    missions_query = fs.read()
+with open('queries/cores.txt', 'r') as fs:
+    cores_query = fs.read()
 
-def fetch_missions_information():
+
+def fetch_missions_information(upcoming: bool, failed: bool):
     """
             Fetches the following information about all the missions/launches from the API:
                 - the mission names
                 - the ids of cores within the first stage of the rocket launched in the mission
                 - the payload mass carried to space, in kgs.
-        """
-    payload = '{"query":"{\\r\\n  launchesPast {\\r\\n    mission_name\\r\\n    rocket {\\r\\n      rocket_name\\r\\n      first_stage {\\r\\n        cores {\\r\\n          core {\\r\\n            id\\r\\n          }\\r\\n        }\\r\\n      }\\r\\n      second_stage {\\r\\n        payloads {\\r\\n          payload_mass_kg\\r\\n        }\\r\\n      }\\r\\n    }\\r\\n  }\\r\\n}\\r\\n","variables":{}}'
-    return requests.request("POST", url, headers=headers, data=payload).json()
+    """
 
+    missions_information = \
+        requests.request("POST", url, headers=headers, data=missions_query).json()["data"]["launchesPast"]
+
+    for mission in missions_information:
+        mission["upcoming"] = False
+
+    if upcoming:
+        upcoming_query = missions_query.replace('launchesPast', 'launchesUpcoming')
+        upcoming_missions_info = \
+            requests.request("POST", url, headers=headers, data=upcoming_query).json()["data"]["launchesUpcoming"]
+
+        for mission in upcoming_missions_info:
+            mission["upcoming"] = True
+
+        missions_information += upcoming_missions_info
+
+    # the "filter:" option for launches in the GraphQL API can only filter by string values, and not booleans, therefore
+    # the removal of missions with failed flights has to be done after receiving the data, and not in the query (the
+    # launch_success field is a boolean type field).
+
+
+    return missions_information
 
 def fetch_cores_information(count: int):
     """
@@ -24,6 +50,6 @@ def fetch_cores_information(count: int):
             - the names of missions where the core was used
             - the reuse count
     """
-    payload = '{\"query\":\"{\\r\\n  cores(sort: \\\"reuse_count\\\", order: \\\"desc\\\", limit: ' + \
-              str(count) + ') {\\r\\n    id\\r\\n    missions {\\r\\n      name\\r\\n    }\\r\\n    reuse_count\\r\\n  }\\r\\n}\",\"variables\":{}}'
-    return requests.request("POST", url, headers=headers, data=payload).json()
+
+    _cores_query = cores_query.replace('limit: 10', f'limit: {count}')
+    return requests.request("POST", url, headers=headers, data=_cores_query).json()
