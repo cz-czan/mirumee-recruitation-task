@@ -57,15 +57,16 @@ def get_full_core_information(count: int, _include_upcoming: bool = False, _incl
 
                     # Reuses in upcoming missions are not counted by the API in the response to the core query that's
                     # why we have to add them ourselves
-                    if mission["upcoming"]:
-                        core['reuse_count'] += 1
+                    if mission["upcoming"] and include_upcoming:
+                        if debug:
+                            core['reuse_count'] += 1
+                            print(f"{core['id']} will take part in mission {mission['mission_name']}"
+                                  f" and deliver a payload of {mission_total_payload_mass} kg")
+                    else:
                         if debug:
                             print(f"{core['id']} took part in mission {mission['mission_name']}"
                                   f" and delivered a payload of {mission_total_payload_mass} kg")
-                    else:
-                        if debug:
-                            print(f"{core['id']} will take part in mission {mission['mission_name']}"
-                                  f" and deliver a payload of {mission_total_payload_mass} kg")
+
                     total_payload_mass += mission_total_payload_mass
                     break
         if debug:
@@ -97,4 +98,4 @@ if __name__ == "__main__":
     except getopt.GetoptError as err:
         print(str(err))
 
-    print(get_full_core_information(limit if limit != 0 else 10, include_upcoming, include_failed))
+    print(get_full_core_information(limit if limit != 0 else 0, include_upcoming, include_failed))
