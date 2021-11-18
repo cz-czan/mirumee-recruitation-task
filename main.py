@@ -20,7 +20,7 @@ def get_full_core_information(count: int, _include_upcoming: bool = False, _incl
             (<core id>, <core reuse count>, <core's total payload mass delivered to space throughout all missions>)
     """
     complete_core_information = []
-    missions_information = f.fetch_missions_information(_include_upcoming, _include_failed)
+    missions_information = f.fetch_missions_information(_include_upcoming)
 
     # Assuming that an upcoming mission can't fail since it hasn't started
 
@@ -72,9 +72,8 @@ def get_full_core_information(count: int, _include_upcoming: bool = False, _incl
         if debug:
             print(
                 f"{core['id']}'s total payload mass delivered throughout all missions "
-                f"{'(including future missions)' if _include_upcoming  else ''}  is: {total_payload_mass} kgs.\n"
+                f"{'(including upcoming missions)' if _include_upcoming  else ''}  is: {total_payload_mass} kgs.\n"
                 f"It {'had/will have' if _include_upcoming  else 'had'} been reused {core['reuse_count']} times.\n")
-
 
         complete_core_information.append((core['id'], core['reuse_count'], total_payload_mass))
 

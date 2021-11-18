@@ -1,5 +1,6 @@
 import requests
 
+
 url = "http://api.spacex.land/graphql"
 headers = {
     'Content-Type': 'application/json'
@@ -12,7 +13,7 @@ with open('queries/cores.txt', 'r') as fs:
     cores_query = fs.read()
 
 
-def fetch_missions_information(upcoming: bool, failed: bool):
+def fetch_missions_information(upcoming: bool = False):
     """
             Fetches the following information about all the missions/launches from the API:
                 - the mission names
