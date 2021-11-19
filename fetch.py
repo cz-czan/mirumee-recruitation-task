@@ -1,5 +1,5 @@
 import requests
-
+import os.path
 
 url = "http://api.spacex.land/graphql"
 headers = {
@@ -7,9 +7,9 @@ headers = {
 }
 
 # The queries are stored in .txt files to avoid clutter in the source
-with open('queries/past_missions.txt', 'r') as fs:
+with open(os.path.dirname(__file__) + '/queries/past_missions.txt', 'r') as fs:
     missions_query = fs.read()
-with open('queries/cores.txt', 'r') as fs:
+with open(os.path.dirname(__file__) + '/queries/cores.txt', 'r') as fs:
     cores_query = fs.read()
 
 
