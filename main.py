@@ -52,7 +52,8 @@ def get_full_core_information(count: int = 0, _include_upcoming: bool = False, _
 
                             # Reuses in failed missions are counted by the API in the response to the core query
                             # that's why we have to subtract them ourselves
-                            core['reuse_count'] -= 1
+                            if core['reuse_count'] > 0:
+                                core['reuse_count'] -= 1
                             break
 
                     # Reuses in upcoming missions are not counted by the API in the response to the core query that's
