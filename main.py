@@ -9,7 +9,7 @@ include_upcoming = False
 include_failed = False
 
 
-def get_full_core_information(count: int, _include_upcoming: bool = False, _include_failed: bool = False):
+def get_full_core_information(count: int = 0, _include_upcoming: bool = False, _include_failed: bool = False):
     """
         Crosses/links information fetched by fetch.fetch_cores_information() and fetch.fetch_missions_information() so
         that we get a list containing tuples with:
