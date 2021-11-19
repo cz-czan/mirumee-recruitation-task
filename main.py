@@ -1,4 +1,4 @@
-import fetch as f
+import mirumee_webapp.fetch_spacex.fetch as f
 import sys
 import getopt
 
